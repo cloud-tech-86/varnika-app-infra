@@ -8,18 +8,35 @@ permissions:
   contents: read
 
 jobs:
+
   destroy:
+
+    environment: PROD
+
     runs-on: ubuntu-latest
 
     steps:
 
       - uses: actions/checkout@v4
 
+      - uses: actions/checkout@v4
+        with:
+          repository: cloud-tech-86/cloud-platform-cdk
+          path: cloud-platform-cdk
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - run: npm ci
+
+      - run: |
+          cd cloud-platform-cdk
+          npm ci
+          npm run build
+
+      - run: npm install
+
       - run: npm run build
 
       - uses: aws-actions/configure-aws-credentials@v4
@@ -27,5 +44,4 @@ jobs:
           role-to-assume: arn:aws:iam::786359465516:role/Github-OIDC-Role
           aws-region: ap-south-1
 
-      - name: Destroy
-        run: npx cdk destroy --all --force
+      - run: npx cdk destroy --all --force
