@@ -1,0 +1,14 @@
+{
+  "vendor": "aws",
+  "application": "varnika",
+  "environment": "dev",
+  "accountId": "786359465516",
+  "region": "ap-south-1",
+  "owner": "Pushpendra",
+  "costCenter": "IT",
+  "businessUnit": "Cloud",
+  "vpcCidr": "10.0.0.0/16",
+  "instanceType": "t3.micro",
+  "roleArn": "arn:aws:iam::786359465516:role/PowerRole",
+  "mandatoryTags": {}
+}  
