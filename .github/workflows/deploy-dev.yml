@@ -1,4 +1,4 @@
-name: Deploy PROD
+name: Deploy DEV
 
 on:
   workflow_dispatch:
@@ -17,35 +17,49 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v4
+      - name: Checkout Application Repo
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+      - name: Checkout Platform CDK Repo
+        uses: actions/checkout@v4
         with:
           repository: cloud-tech-86/cloud-platform-cdk
           path: cloud-platform-cdk
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - run: npm ci
-
-      - run: |
+      - name: Build Platform Library
+        run: |
           cd cloud-platform-cdk
-          npm ci
+          npm install
           npm run build
 
-      - run: npm install
+      - name: Install Application Dependencies
+        run: npm install
 
-      - run: npm run build
+      - name: Install Platform Library Into Application
+        run: npm install ./cloud-platform-cdk
 
-      - run: npm test
+      - name: Verify Platform Library
+        run: npm list @cloudtech/platform-cdk
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Build Application
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::786359465516:role/Github-OIDC-Role
           aws-region: ap-south-1
 
-      - run: npx cdk diff -c env=dev
+      - name: CDK Diff
+        run: npx cdk diff -c env=dev
 
-      - run: npx cdk deploy -c env=dev --require-approval never
+      - name: CDK Deploy
+        run: npx cdk deploy -c env=dev --require-approval never
