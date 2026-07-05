@@ -22,7 +22,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: cloud-tech-86/cloud-platform-cdk
-          token: ${{ secrets.PLATFORM_REPO_TOKEN }}
           path: cloud-platform-cdk
 
       - name: Setup Node
