@@ -1,16 +1,17 @@
-name: Deploy Infrastructure
+name: Destroy Infrastructure
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  deploy:
+  destroy:
+
+    environment: PROD
+
     runs-on: ubuntu-latest
 
     steps:
@@ -48,17 +49,11 @@ jobs:
       - name: Build Application
         run: npm run build
 
-      - name: Run Unit Tests
-        run: npm test
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::786359465516:role/Github-OIDC-Role
           aws-region: ap-south-1
 
-      - name: CDK Diff
-        run: npx cdk diff
-
-      - name: CDK Deploy
-        run: npx cdk deploy --require-approval never
+      - name: Destroy Infrastructure
+        run: npx cdk destroy --all --force
