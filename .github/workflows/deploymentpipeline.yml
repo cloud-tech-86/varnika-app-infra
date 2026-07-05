@@ -14,44 +14,76 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      # Checkout Application Repository
       - name: Checkout Application Repo
         uses: actions/checkout@v4
 
+      # Checkout Platform Library Repository
       - name: Checkout Platform CDK
         uses: actions/checkout@v4
         with:
           repository: cloud-tech-86/cloud-platform-cdk
+          ref: main
           path: cloud-platform-cdk
 
+      # Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
-      - name: Install App Dependencies
-        run: npm ci
+      # Debug Platform Repository
+      - name: Debug Platform Repository
+        run: |
+          echo "===== Platform Repo ====="
+          cd cloud-platform-cdk
+          git log --oneline -5
 
-      - name: Install Platform CDK
+      # Build Platform Library
+      - name: Build Platform CDK
         run: |
           cd cloud-platform-cdk
+          rm -rf dist
           npm ci
           npm run build
 
-      - name: Build App
+      # Verify Build Output
+      - name: Verify Platform Build
+        run: |
+          ls -R cloud-platform-cdk/dist
+
+      # Install Application Dependencies
+      - name: Install App Dependencies
+        run: npm ci
+
+      # Build Application
+      - name: Build Application
         run: npm run build
 
-      - name: Test
+      # Run Unit Tests
+      - name: Run Tests
         run: npm test
 
+      # Configure AWS OIDC Authentication
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::786359465516:role/Github-OIDC-Role
           aws-region: ap-south-1
 
-      - name: CDK Diff
-        run: cdk diff
+      # Verify AWS Identity
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
 
+      # CDK Synth
+      - name: CDK Synth
+        run: npx cdk synth
+
+      # CDK Diff
+      - name: CDK Diff
+        run: npx cdk diff
+
+      # Deploy
       - name: CDK Deploy
-        run: cdk deploy --require-approval never
+        run: npx cdk deploy --require-approval never
