@@ -15,75 +15,51 @@ jobs:
 
     steps:
 
-      # Checkout Application Repository
       - name: Checkout Application Repo
         uses: actions/checkout@v4
 
-      # Checkout Platform Library Repository
-      - name: Checkout Platform CDK
+      - name: Checkout Platform CDK Repo
         uses: actions/checkout@v4
         with:
           repository: cloud-tech-86/cloud-platform-cdk
-          ref: main
           path: cloud-platform-cdk
 
-      # Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      # Debug Platform Repository
-      - name: Debug Platform Repository
-        run: |
-          echo "===== Platform Repo ====="
-          cd cloud-platform-cdk
-          git log --oneline -5
-
-      # Build Platform Library
-      - name: Build Platform CDK
+      - name: Build Platform Library
         run: |
           cd cloud-platform-cdk
-          rm -rf dist
-          npm ci
+          npm install
           npm run build
 
-      # Verify Build Output
-      - name: Verify Platform Build
+      - name: Install Application Dependencies
+        run: npm install
+
+      - name: Install Platform Library Into Application
+        run: npm install ./cloud-platform-cdk
+
+      - name: Verify Platform Library
         run: |
-          ls -R cloud-platform-cdk/dist
+          npm list @cloudtech/platform-cdk
+          ls node_modules/@cloudtech
 
-      # Install Application Dependencies
-      - name: Install App Dependencies
-        run: npm ci
-
-      # Build Application
       - name: Build Application
         run: npm run build
 
-      # Run Unit Tests
-      - name: Run Tests
+      - name: Run Unit Tests
         run: npm test
 
-      # Configure AWS OIDC Authentication
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::786359465516:role/Github-OIDC-Role
           aws-region: ap-south-1
 
-      # Verify AWS Identity
-      - name: Verify AWS Identity
-        run: aws sts get-caller-identity
-
-      # CDK Synth
-      - name: CDK Synth
-        run: npx cdk synth
-
-      # CDK Diff
       - name: CDK Diff
         run: npx cdk diff
 
-      # Deploy
       - name: CDK Deploy
         run: npx cdk deploy --require-approval never
