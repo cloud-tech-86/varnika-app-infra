@@ -16,8 +16,14 @@ jobs:
 
     steps:
 
-      - name: Checkout
+      - name: Checkout Application Repo
         uses: actions/checkout@v4
+
+      - name: Checkout Platform CDK
+        uses: actions/checkout@v4
+        with:
+          repository: cloud-tech-86/cloud-platform-cdk
+          path: ../cloud-platform-cdk
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -39,8 +45,8 @@ jobs:
           role-to-assume: arn:aws:iam::786359465516:role/Github-OIDC-Role
           aws-region: ap-south-1
 
-      - name: CDK Bootstrap Check
-        run: cdk bootstrap
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
 
       - name: CDK Diff
         run: cdk diff
