@@ -6,7 +6,7 @@
   "region": "ap-south-1",
   "owner": "Pushpendra",
   "costCenter": "IT",
-  "businessUnit": "Cloud",
+  "businessUnit": "Cloudtest",
   "vpcCidr": "10.0.0.0/16",
   "instanceType": "t3.micro",
   "roleArn": "arn:aws:iam::786359465516:role/Poweruser",

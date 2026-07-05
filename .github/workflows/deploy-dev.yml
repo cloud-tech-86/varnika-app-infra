@@ -1,4 +1,4 @@
-name: Destroy Infrastructure
+name: Deploy PROD
 
 on:
   workflow_dispatch:
@@ -8,52 +8,44 @@ permissions:
   contents: read
 
 jobs:
-  destroy:
 
-    environment: PROD
+  deploy:
+
+    environment: dev
 
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout Application Repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Checkout Platform CDK Repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: cloud-tech-86/cloud-platform-cdk
           path: cloud-platform-cdk
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Build Platform Library
-        run: |
+      - run: npm ci
+
+      - run: |
           cd cloud-platform-cdk
-          npm install
+          npm ci
           npm run build
 
-      - name: Install Application Dependencies
-        run: npm install
+      - run: npm install
 
-      - name: Install Platform Library Into Application
-        run: npm install ./cloud-platform-cdk
+      - run: npm run build
 
-      - name: Verify Platform Library
-        run: |
-          npm list @cloudtech/platform-cdk
+      - run: npm test
 
-      - name: Build Application
-        run: npm run build
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::786359465516:role/Github-OIDC-Role
           aws-region: ap-south-1
 
-      - name: Destroy Infrastructure
-        run: npx cdk destroy --all --force
+      - run: npx cdk diff -c env=dev
+
+      - run: npx cdk deploy -c env=dev --require-approval never
